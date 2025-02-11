@@ -11,8 +11,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
 
-import static de.rieckpil.courses.book.review.RandomReviewParameterResolverExtension.RandomReview;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(RandomReviewParameterResolverExtension.class)
 class ReviewVerifierTest {
@@ -20,32 +20,47 @@ class ReviewVerifierTest {
   private ReviewVerifier reviewVerifier;
 
   @BeforeEach
-  void setup() {
+  public void setup() {
     reviewVerifier = new ReviewVerifier();
   }
 
   @Test
   void shouldFailWhenReviewContainsSwearWord() {
     String review = "This book is shit";
-    System.out.println("Testing a review");
-
     boolean result = reviewVerifier.doesMeetQualityStandards(review);
     assertFalse(result, "ReviewVerifier did not detect swear word");
   }
 
   @Test
   @DisplayName("Should fail when review contains 'lorem ipsum'")
-  void testLoremIpsum() {}
+  void testLoremIpsum() {
+    String review =
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas dictum ex in est hendrerit, lobortis cursus est tincidunt. Mauris tristique libero ac lectus fermentum sollicitudin. Suspendisse ac venenatis quam. Nullam et fringilla dolor. Fusce nibh ipsum, posuere quis nisi at, vehicula laoreet orci. In hac habitasse platea dictumst.";
+    boolean result = reviewVerifier.doesMeetQualityStandards(review);
+    assertFalse(result, "ReviewVerifier did not detect 'lorem ipsum'");
+  }
 
   @ParameterizedTest
   @CsvFileSource(resources = "/badReview.csv")
-  void shouldFailWhenReviewIsOfBadQuality(String review) {}
+  void shouldFailWhenReviewIsOfBadQuality(String review) {
+    boolean result = reviewVerifier.doesMeetQualityStandards(review);
+    assertFalse(result, "ReviewVerifier did not detect a bad review");
+  }
 
   @RepeatedTest(5)
-  void shouldFailWhenRandomReviewQualityIsBad(@RandomReview String review) {}
+  void shouldFailWhenRandomReviewQualityIsBad(
+      @RandomReviewParameterResolverExtension.RandomReview String review) {
+    boolean result = reviewVerifier.doesMeetQualityStandards(review);
+    assertFalse(result, "ReviewVerifier did not detect a random bad review");
+  }
 
   @Test
-  void shouldPassWhenReviewIsGood() {}
+  void shouldPassWhenReviewIsGood() {
+    String review =
+      "I can totally recommend this book who is interested in learning how to write Java code!";
+    boolean result = reviewVerifier.doesMeetQualityStandards(review);
+    assertTrue(result, "ReviewVerifier did not detect a good review");
+  }
 
   @Test
   void shouldPassWhenReviewIsGoodHamcrest() {
